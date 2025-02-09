@@ -2,6 +2,12 @@
 
 A Next.js UI for EthPixelWar.
 
+## Preview
+
+![EthPixelWar Grid](https://github.com/user-attachments/assets/56700452-a496-4ea1-806e-b1a55ce0d1d2)
+![EthPixelWar Color Picker](https://github.com/user-attachments/assets/58d3ed44-092e-4b7e-8733-51d81053e53c)
+
+
 ## Getting Started
 
 Install dependencies:

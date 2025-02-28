@@ -27,12 +27,7 @@ export const CONTRACT_ABI = [
     "name": "bid",
     "inputs": [
       {
-        "name": "x",
-        "type": "uint16",
-        "internalType": "uint16"
-      },
-      {
-        "name": "y",
+        "name": "pixelId",
         "type": "uint16",
         "internalType": "uint16"
       }
@@ -49,13 +44,48 @@ export const CONTRACT_ABI = [
   },
   {
     "type": "function",
-    "name": "grid",
-    "inputs": [
+    "name": "getGrid",
+    "inputs": [],
+    "outputs": [
       {
         "name": "",
-        "type": "uint16",
-        "internalType": "uint16"
-      },
+        "type": "tuple[]",
+        "internalType": "struct Pixel[]",
+        "components": [
+          {
+            "name": "owner",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "highestBid",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "r",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "g",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "b",
+            "type": "uint8",
+            "internalType": "uint8"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "grid",
+    "inputs": [
       {
         "name": "",
         "type": "uint16",
@@ -93,19 +123,6 @@ export const CONTRACT_ABI = [
   },
   {
     "type": "function",
-    "name": "gridSize",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint16",
-        "internalType": "uint16"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "liteMode",
     "inputs": [],
     "outputs": [
@@ -113,6 +130,19 @@ export const CONTRACT_ABI = [
         "name": "",
         "type": "bool",
         "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "nbPixels",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint16",
+        "internalType": "uint16"
       }
     ],
     "stateMutability": "view"
@@ -187,12 +217,7 @@ export const CONTRACT_ABI = [
     "name": "updateColor",
     "inputs": [
       {
-        "name": "x",
-        "type": "uint16",
-        "internalType": "uint16"
-      },
-      {
-        "name": "y",
+        "name": "pixelId",
         "type": "uint16",
         "internalType": "uint16"
       },
@@ -227,13 +252,7 @@ export const CONTRACT_ABI = [
     "name": "ColorUpdated",
     "inputs": [
       {
-        "name": "x",
-        "type": "uint16",
-        "indexed": false,
-        "internalType": "uint16"
-      },
-      {
-        "name": "y",
+        "name": "pixelId",
         "type": "uint16",
         "indexed": false,
         "internalType": "uint16"
@@ -283,13 +302,7 @@ export const CONTRACT_ABI = [
     "name": "PixelBid",
     "inputs": [
       {
-        "name": "x",
-        "type": "uint16",
-        "indexed": false,
-        "internalType": "uint16"
-      },
-      {
-        "name": "y",
+        "name": "pixelId",
         "type": "uint16",
         "indexed": false,
         "internalType": "uint16"

@@ -6,12 +6,10 @@ import { CONTRACT_ABI, CONTRACT_ADDRESS } from '../contract';
 
 // Individual pixel component that displays color and handles selection
 interface PixelProps {
-  x: number;
-  y: number;
+  id: number;
   showOwned: boolean; // Whether to highlight pixels owned by current user
   onSelect: (pixelData: {
-    x: number;
-    y: number;
+    id: number;
     currentBid: bigint;
     owner: string;
     currentColor: { r: number; g: number; b: number };
@@ -19,7 +17,7 @@ interface PixelProps {
   }) => void;
 }
 
-export default function Pixel({ x, y, onSelect, showOwned }: PixelProps) {
+export default function Pixel({ id, onSelect, showOwned }: PixelProps) {
   const { address } = useAccount();
   const [owner, setOwner] = useState('0x0000000000000000000000000000000000000000');
   const [highestBid, sethighestBid] = useState(BigInt(0));
@@ -30,7 +28,7 @@ export default function Pixel({ x, y, onSelect, showOwned }: PixelProps) {
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
     functionName: 'grid',
-    args: [x, y],
+    args: [id],
   });
 
   // Update local state when pixel data changes
@@ -48,8 +46,7 @@ export default function Pixel({ x, y, onSelect, showOwned }: PixelProps) {
   return (
     <div
       onClick={() => onSelect({
-        x,
-        y,
+        id,
         currentBid: highestBid,
         owner,
         currentColor: color,

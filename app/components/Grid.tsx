@@ -8,12 +8,17 @@ import { CONTRACT_ABI, CONTRACT_ADDRESS } from '../contract';
 
 // Main grid component that displays the pixel canvas
 // Shows a welcome message if wallet is not connected or grid is not available
-export default function Grid({ showOwnedPixels}: { showOwnedPixels: boolean }) {
+export default function Grid({ 
+  showOwnedPixels, 
+  isWarActive 
+}: { 
+  showOwnedPixels: boolean;
+  isWarActive: boolean;
+}) {
   const [gridDimension, setGridDimension] = useState<number>(0);
   const { address } = useAccount();
   const [selectedPixel, setSelectedPixel] = useState<{
-    x: number;
-    y: number;
+    id: number;
     currentBid: bigint;
     owner: string;
     currentColor: { r: number; g: number; b: number };
@@ -21,18 +26,18 @@ export default function Grid({ showOwnedPixels}: { showOwnedPixels: boolean }) {
   } | null>(null);
 
   // Fetch grid dimensions from smart contract
-  const { data: gridSize } = useReadContract({
+  const { data: nbPixels } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
-    functionName: 'gridSize',
+    functionName: 'nbPixels',
   });
 
   // Update local state when grid size is fetched
   useEffect(() => {
-    if (gridSize) {
-      setGridDimension(Number(gridSize));
+    if (nbPixels) {
+      setGridDimension(Math.sqrt(Number(nbPixels)));
     }
-  }, [gridSize]);
+  }, [nbPixels]);
 
   return (
     <>
@@ -61,13 +66,10 @@ export default function Grid({ showOwnedPixels}: { showOwnedPixels: boolean }) {
         >
           {/* Generate grid cells based on dimensions */}
           {Array.from({ length: gridDimension * gridDimension }).map((_, index) => {
-            const x = Math.floor(index % gridDimension);
-            const y = Math.floor(index / gridDimension);
             return (
               <Pixel 
-                key={`${x}-${y}`} 
-                x={x} 
-                y={y} 
+                key={index} 
+                id={index}
                 onSelect={setSelectedPixel}
                 showOwned={showOwnedPixels}
               />
@@ -84,9 +86,9 @@ export default function Grid({ showOwnedPixels}: { showOwnedPixels: boolean }) {
           }
           setSelectedPixel(null);
         }}
+        isWarActive={isWarActive}
         {...selectedPixel || {
-          x: 0,
-          y: 0,
+          id: 0,
           currentBid: BigInt(0),
           owner: '',
           currentColor: { r: 0, g: 0, b: 0 },

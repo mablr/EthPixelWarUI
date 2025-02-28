@@ -8,7 +8,17 @@ import { CONTRACT_ADDRESS, CONTRACT_ABI } from '@/app/contract';
 import { useEffect, useState } from 'react';
 
 // Navigation bar component with wallet connection and user actions
-export default function Navbar({ showOwnedPixels, setShowOwnedPixels }: { showOwnedPixels: boolean; setShowOwnedPixels: (show: boolean) => void }) {
+export default function Navbar({ 
+  showOwnedPixels, 
+  setShowOwnedPixels, 
+  isWarActive,
+  refetchWarStatus
+}: { 
+  showOwnedPixels: boolean; 
+  setShowOwnedPixels: (show: boolean) => void;
+  isWarActive: boolean;
+  refetchWarStatus: () => void;
+}) {
   const { address } = useAccount();
   const [withdrawHash, setWithdrawHash] = useState<`0x${string}` | undefined>();
   const [endWarHash, setEndWarHash] = useState<`0x${string}` | undefined>();
@@ -18,12 +28,6 @@ export default function Navbar({ showOwnedPixels, setShowOwnedPixels }: { showOw
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
     functionName: 'owner',
-  });
-
-  const { data: isWarActive, refetch: refetchWarStatus } = useReadContract({
-    address: CONTRACT_ADDRESS,
-    abi: CONTRACT_ABI,
-    functionName: 'pixelWarIsActive',
   });
 
   // Read pending withdrawal amount
@@ -92,9 +96,16 @@ export default function Navbar({ showOwnedPixels, setShowOwnedPixels }: { showOw
     <nav className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50 shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link href="/" className="text-xl font-bold">
-            {metadata.title?.toString()}
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/" className="text-xl font-bold">
+              {metadata.title?.toString()}
+            </Link>
+            {!isWarActive && (
+              <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full font-medium">
+                Ended
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-4">
             {address !== undefined && (
               <button

@@ -9,8 +9,8 @@ import { CONTRACT_ABI, CONTRACT_ADDRESS } from '../contract';
 interface PixelModalProps {
   isOpen: boolean;
   onClose: () => void;
-  x: number;
-  y: number;
+  isWarActive: boolean;
+  id: number;
   currentBid: bigint;
   owner: string;
   currentColor: { r: number; g: number; b: number };
@@ -20,8 +20,8 @@ interface PixelModalProps {
 export default function PixelModal({
   isOpen,
   onClose,
-  x,
-  y,
+  isWarActive,
+  id,
   currentBid,
   owner,
   currentColor,
@@ -76,11 +76,11 @@ export default function PixelModal({
   }, [isBidSuccess, isColorSuccess, refetch, onClose]);
 
   // Submit bid transaction to smart contract
-  const placeBid = (params: { args: [number, number], value: bigint }) => writeContract({
+  const placeBid = (params: { id: number, value: bigint }) => writeContract({
     abi: CONTRACT_ABI,
     address: CONTRACT_ADDRESS,
     functionName: 'bid',
-    args: params.args,
+    args: [params.id],
     value: params.value,
   });
 
@@ -90,22 +90,23 @@ export default function PixelModal({
       return;
     }
     placeBid({
-      args: [x, y],
+      id: id,
       value: bidAmount,
     });
   };
 
   // Submit color update transaction to smart contract
-  const updateColor = (params: { args: [number, number, { r: number, g: number, b: number }] }) => writeColorUpdate({
+  const updateColor = (params: { id: number, color: { r: number, g: number, b: number } }) => writeColorUpdate({
     abi: CONTRACT_ABI,
     address: CONTRACT_ADDRESS,
     functionName: 'updateColor',
-    args: [params.args[0], params.args[1], params.args[2].r, params.args[2].g, params.args[2].b]
+    args: [params.id, params.color.r, params.color.g, params.color.b]
   });
 
   const handleColorUpdate = () => {
     updateColor({
-      args: [x, y, color],
+      id: id,
+      color: color,
     });
   };
 
@@ -122,7 +123,7 @@ export default function PixelModal({
             }
           }}
         >
-          <div className="bg-white p-6 rounded-lg max-w-md w-full relative">
+          <div className="bg-white p-8 rounded-lg max-w-lg w-full relative">
             <button
               onClick={onClose}
               className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 z-[60]"
@@ -131,111 +132,98 @@ export default function PixelModal({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <h2 className="text-xl font-bold mb-4">Pixel ({x}, {y})</h2>
-            
-            {!isOwner && (
-              <>
-                <div className="mb-4">
-                  <p className="truncate">Current Bid: {Number(currentBid) / 1e18} ETH</p>
-                  <p className="truncate">Owner: {owner}</p>
-                </div>
-                <div className="mb-4">
-                  <label className="block mb-2">Place Bid (ETH)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    onChange={(e) => setBidAmount(BigInt(Number(e.target.value) * 1e18))}
-                    className="border p-2 rounded w-full"
-                    disabled={isBidLoading || isBidConfirming}
-                  />
-                  <button
-                    onClick={handleBid}
-                    disabled={isBidLoading || isBidConfirming || bidAmount <= currentBid}
-                    className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
-                  >
-                    {isBidLoading ? 'Bidding...' : isBidConfirming ? 'Confirming...' : 'Place Bid'}
-                  </button>
-                </div>
-              </>
+            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+              <span 
+                className="inline-block w-6 h-6 border-2 border-gray-400 rounded-md" 
+                style={{ backgroundColor: `rgb(${color.r}, ${color.g}, ${color.b})` }}
+              ></span>
+              Pixel #{id}
+            </h2>
+              <div className="mb-4">
+                <p className="truncate">Current Bid: {Number(currentBid) / 1e18} ETH</p>
+                <p className="truncate">Owner: {owner}</p>
+              </div>
+          
+            {isWarActive && !isOwner && (
+              <div className="flex w-full gap-4">
+                <input
+                  type="number"
+                  step="0.01"
+                  value={`${Number(bidAmount) / 1e18}`}
+                  onChange={(e) => setBidAmount(BigInt(Number(e.target.value) * 1e18))}
+                  className="border p-2 rounded flex-grow"
+                  disabled={isBidLoading || isBidConfirming}
+                />
+                <button
+                  onClick={handleBid}
+                  disabled={isBidLoading || isBidConfirming || bidAmount <= currentBid}
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50 whitespace-nowrap"
+                >
+                  {isBidLoading ? 'Bidding...' : isBidConfirming ? 'Confirming...' : 'Place Bid (ETH)'}
+                </button>
+              </div>
             )}
 
-            {isOwner && (
-              <div className="mb-4">
-                <label className="block mb-2">Update Color</label>
-                <div className="flex flex-col gap-4 mb-2">
-                  <input
-                    type="color" 
-                    value={`#${Object.values(color).map(v => v.toString(16).padStart(2,'0')).join('')}`}
-                    onChange={(e) => {
-                      const hex = e.target.value.substring(1);
-                      setColor({
-                        r: parseInt(hex.substring(0,2), 16),
-                        g: parseInt(hex.substring(2,4), 16),
-                        b: parseInt(hex.substring(4,6), 16)
-                      });
-                    }}
-                    className="w-full h-12 cursor-pointer"
-                    disabled={isColorLoading || isColorConfirming}
-                  />
-                  <div className="grid grid-cols-3 gap-2">
-                    <div>
-                      <label className="text-sm text-gray-600">Red</label>
-                      <input
-                        type="range"
-                        min="0"
-                        max="255"
-                        value={color.r}
-                        onChange={(e) => setColor(prev => ({
-                          ...prev,
-                          r: Number(e.target.value)
-                        }))}
-                        className="w-full"
-                        disabled={isColorLoading || isColorConfirming}
-                      />
-                      <div className="text-center text-sm">{color.r}</div>
-                    </div>
-                    <div>
-                      <label className="text-sm text-gray-600">Green</label>
-                      <input
-                        type="range"
-                        min="0"
-                        max="255"
-                        value={color.g}
-                        onChange={(e) => setColor(prev => ({
-                          ...prev,
-                          g: Number(e.target.value)
-                        }))}
-                        className="w-full"
-                        disabled={isColorLoading || isColorConfirming}
-                      />
-                      <div className="text-center text-sm">{color.g}</div>
-                    </div>
-                    <div>
-                      <label className="text-sm text-gray-600">Blue</label>
-                      <input
-                        type="range"
-                        min="0"
-                        max="255"
-                        value={color.b}
-                        onChange={(e) => setColor(prev => ({
-                          ...prev,
-                          b: Number(e.target.value)
-                        }))}
-                        className="w-full"
-                        disabled={isColorLoading || isColorConfirming}
-                      />
-                      <div className="text-center text-sm">{color.b}</div>
-                    </div>
+            {isWarActive && isOwner && (
+              <>
+                <div className="mb-4 grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="text-sm text-gray-600">Red</label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="255"
+                      value={color.r}
+                      onChange={(e) => setColor(prev => ({
+                        ...prev,
+                        r: Number(e.target.value)
+                      }))}
+                      className="w-full"
+                      disabled={isColorLoading || isColorConfirming}
+                    />
+                    <div className="text-center text-sm">{color.r}</div>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-600">Green</label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="255"
+                      value={color.g}
+                      onChange={(e) => setColor(prev => ({
+                        ...prev,
+                        g: Number(e.target.value)
+                      }))}
+                      className="w-full"
+                      disabled={isColorLoading || isColorConfirming}
+                    />
+                    <div className="text-center text-sm">{color.g}</div>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-600">Blue</label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="255"
+                      value={color.b}
+                      onChange={(e) => setColor(prev => ({
+                        ...prev,
+                        b: Number(e.target.value)
+                      }))}
+                      className="w-full"
+                      disabled={isColorLoading || isColorConfirming}
+                    />
+                    <div className="text-center text-sm">{color.b}</div>
                   </div>
                 </div>
                 <button
                   onClick={handleColorUpdate}
                   disabled={isColorLoading || isColorConfirming}
-                  className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:opacity-50"
+                  className="bg-green-500 w-full text-white px-4 py-2 rounded hover:bg-green-600 disabled:opacity-50"
                 >
                   {isColorLoading ? 'Updating...' : isColorConfirming ? 'Confirming...' : 'Update Color'}
                 </button>
-              </div>
+              </>
             )}
 
 

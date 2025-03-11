@@ -5,7 +5,7 @@ import { mainnet, polygon, optimism, arbitrum, anvil } from 'wagmi/chains';
 
 export const config = createConfig(
   getDefaultConfig({
-    appName: 'ConnectKit Next.js demo',
+    appName: 'EthPixelWar',
     chains: [mainnet, polygon, optimism, arbitrum, anvil],
     walletConnectProjectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!,
   })

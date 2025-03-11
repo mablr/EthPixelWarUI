@@ -53,6 +53,10 @@ The main components of this application include:
 - Outline the pixels you own
 - Withdraw the amount of lost bids 
 - The owner can end the war at any time and send back the bids to the users
+- Auto-refresh grid data every 10 seconds to keep the UI updated
+- Responsive grid that adapts to different screen sizes
+- Real-time transaction status feedback
+- Intuitive color picker with RGB sliders
 
 ## Technologies Used
 

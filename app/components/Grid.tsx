@@ -48,7 +48,7 @@ export default function Grid({
   isWarActive: boolean;
 }) {
   // State for grid configuration and pixel data
-  const [gridDimension, setGridDimension] = useState<number>(0);
+  const [gridDimensions, setGridDimensions] = useState<{ dimX: number, dimY: number }>({ dimX: 0, dimY: 0 });
   const [selectedPixel, setSelectedPixel] = useState<number | null>(null);
   const [pixels, setPixels] = useState<Pixel[]>([]);
   
@@ -56,10 +56,16 @@ export default function Grid({
   const { address } = useAccount();
 
   // Fetch grid dimensions from smart contract
-  const { data: nbPixels } = useReadContract({
+  const { data: dimX } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
-    functionName: 'nbPixels',
+    functionName: 'dimX',
+  });
+
+  const { data: dimY } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: CONTRACT_ABI,
+    functionName: 'dimY',
   });
 
   // Fetch all pixels data in a single call
@@ -88,11 +94,11 @@ export default function Grid({
 
   // Calculate and update grid dimensions when nbPixels changes
   useEffect(() => {
-    if (nbPixels) {
+    if (dimX && dimY) {
       // Grid is square, so dimension is square root of total pixels
-      setGridDimension(Math.sqrt(Number(nbPixels)));
+      setGridDimensions({ dimX: Number(dimX), dimY: Number(dimY) });
     }
-  }, [nbPixels]);
+  }, [dimX, dimY]);
 
   // Handle pixel selection and modal closing
   const handlePixelClick = (index: number) => setSelectedPixel(index);
@@ -102,7 +108,7 @@ export default function Grid({
   };
 
   // Render welcome message if wallet not connected or grid not loaded
-  if (!address || gridDimension === 0) {
+  if (!address || gridDimensions.dimX === 0 || gridDimensions.dimY === 0) {
     return (
       <div className="w-full max-w-3xl mx-auto p-8">
         <div className="bg-gray-100 rounded-xl p-6 shadow-md">
@@ -123,14 +129,13 @@ export default function Grid({
     <>
       {/* Render grid of pixels with dynamic dimensions */}
       <div
-        key={gridDimension}
         className="grid w-full max-w-3xl mx-auto border-4 border-grey-800 rounded-xl overflow-hidden shadow-md" 
         style={{
-          gridTemplateColumns: `repeat(${gridDimension}, minmax(0, 1fr))`
+          gridTemplateColumns: `repeat(${gridDimensions.dimX}, minmax(0, 1fr))`
         }}
       >
         {/* Generate grid cells based on dimensions */}
-        {Array.from({ length: gridDimension * gridDimension }).map((_, index) => {
+        {Array.from({ length: gridDimensions.dimX * gridDimensions.dimY }).map((_, index) => {
           const pixel = pixels[index];
           if (!pixel) return null;
           

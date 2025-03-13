@@ -5,7 +5,12 @@ export const CONTRACT_ABI = [
     "type": "constructor",
     "inputs": [
       {
-        "name": "_gridSize",
+        "name": "_dimX",
+        "type": "uint16",
+        "internalType": "uint16"
+      },
+      {
+        "name": "_dimY",
         "type": "uint16",
         "internalType": "uint16"
       },
@@ -34,6 +39,32 @@ export const CONTRACT_ABI = [
     ],
     "outputs": [],
     "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "dimX",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint16",
+        "internalType": "uint16"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "dimY",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint16",
+        "internalType": "uint16"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -130,19 +161,6 @@ export const CONTRACT_ABI = [
         "name": "",
         "type": "bool",
         "internalType": "bool"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "nbPixels",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint16",
-        "internalType": "uint16"
       }
     ],
     "stateMutability": "view"

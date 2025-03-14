@@ -129,7 +129,7 @@ export default function Grid({
     <>
       {/* Render grid of pixels with dynamic dimensions */}
       <div
-        className="grid w-full max-w-3xl mx-auto border-4 border-grey-800 rounded-xl overflow-hidden shadow-md" 
+        className="grid w-full mx-auto border-4 border-grey-800 rounded-xl overflow-hidden shadow-md" 
         style={{
           gridTemplateColumns: `repeat(${gridDimensions.dimX}, minmax(0, 1fr))`
         }}
